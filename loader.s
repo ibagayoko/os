@@ -1,7 +1,10 @@
+; For the bootloader
 .set MAGIC, 0x1badb002
 .set FLAGS, (1<<0 | 1<<1)
 .set CHECKSUM, -(MAGIC + FLAGS)
 
+; we put the vars into .o file
+; so the bootloader will consider as a kernel
 .section .multiboot
     .long MAGIC
     .long FLAGS
@@ -11,17 +14,20 @@
 .section .text
 .extern kernelMain
 .extern callConstructors
-.global loader
+.global loader 
 
 
 loader:
     mov $kernel_stack, %esp
     call callConstructors
+    ; The information from the bootloader 
+    ; the struct
     push %eax
-    push %ebx
+    
+    push %ebx; th magic number
     call kernelMain
 
-
+; infinite loop
 _stop:
     cli
     hlt
